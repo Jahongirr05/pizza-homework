@@ -1,4 +1,3 @@
-<?php session_start(); ?>
 <?php if(file_exists('./logicals/'.$find['file'].'.php')) { include("./logicals/{$find['file']}.php"); } ?>
 <!DOCTYPE html>
 <html>
@@ -22,7 +21,7 @@
 					<?php foreach ($pages as $url => $page) { ?>
 						<?php if(! isset($_SESSION['login']) && $page['menun'][0] || isset($_SESSION['login']) && $page['menun'][1]) { ?>
 							<li<?= (($page == $find) ? ' class="active"' : '') ?>>
-							<a href="<?= ($url == '/') ? '.' : $url ?>">
+							<a href="<?= ($url == '/') ? './' : './?'.$url ?>">
 							<?= $page['text'] ?></a>
 							</li>
 						<?php } ?>
