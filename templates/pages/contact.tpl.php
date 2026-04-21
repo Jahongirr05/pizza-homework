@@ -1,6 +1,91 @@
-<h2>Data</h2>
-<p>Manager: <strong>Somebody</strong></p>
-<p>E-mail: <strong>somebody@simplewebsite.com</strong></p>
-<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2726.3375296155727!2d19.66695091525771!3d46.89607994478184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4743da7a6c479e1d%3A0xc8292b3f6dc69e7f!2sPallasz+Ath%C3%A9n%C3%A9+Egyetem+GAMF+Kar!5e0!3m2!1shu!2shu!4v1475753185783" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
-<br>
-<a target="_blank" href="https://www.google.hu/maps/place/Pallasz+Ath%C3%A9n%C3%A9+Egyetem+GAMF+Kar/@46.8960799,19.6669509,17z/data=!3m1!4b1!4m5!3m4!1s0x4743da7a6c479e1d:0xc8292b3f6dc69e7f!8m2!3d46.8960763!4d19.6691396?hl=hu">Larger map</a>
+<h2>Contact Us</h2>
+
+<script>
+function validateContactForm() {
+    let email = document.forms["contactForm"]["email"].value.trim();
+    let subject = document.forms["contactForm"]["subject"].value.trim();
+    let message = document.forms["contactForm"]["message"].value.trim();
+
+    let emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/i;
+
+    if (!emailPattern.test(email)) {
+        alert("Please enter a valid email address.");
+        return false;
+    }
+
+    if (subject.length < 3) {
+        alert("Subject must be at least 3 characters.");
+        return false;
+    }
+
+    if (message.length < 5) {
+        alert("Message must be at least 5 characters.");
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+<form name="contactForm" method="post" onsubmit="return validateContactForm();">
+    <label>Email:</label><br>
+    <input type="text" name="email"><br><br>
+
+    <label>Subject:</label><br>
+    <input type="text" name="subject"><br><br>
+
+    <label>Message:</label><br>
+    <textarea name="message"></textarea><br><br>
+
+    <input type="submit" name="send" value="Send">
+</form>
+
+<?php
+if (isset($_POST['send'])) {
+    $email = trim($_POST['email']);
+    $subject = trim($_POST['subject']);
+    $message = trim($_POST['message']);
+
+    $errors = [];
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email address.";
+    }
+
+    if (strlen($subject) < 3) {
+        $errors[] = "Subject must be at least 3 characters.";
+    }
+
+    if (strlen($message) < 5) {
+        $errors[] = "Message must be at least 5 characters.";
+    }
+
+    if (empty($errors)) {
+        $conn = new mysqli("sql100.infinityfree.com", "if0_41711727", "dushanbe2025", "if0_41711727_pizza_homework");
+
+        if ($conn->connect_error) {
+            die("Database connection failed.");
+        }
+
+        $sender_name = isset($_SESSION['login']) ? ($_SESSION['fn'] . " " . $_SESSION['ln']) : "Guest";
+
+        $stmt = $conn->prepare("INSERT INTO messages (sender_name, sender_email, subject, message_text) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $sender_name, $email, $subject, $message);
+
+        if ($stmt->execute()) {
+            echo "<p style='color:green;'>Message sent successfully!</p>";
+        } else {
+            echo "<p style='color:red;'>Error while saving the message.</p>";
+        }
+
+        $stmt->close();
+        $conn->close();
+    } else {
+        echo "<div style='color:red;'>";
+        foreach ($errors as $error) {
+            echo "<p>$error</p>";
+        }
+        echo "</div>";
+    }
+}
+?>
